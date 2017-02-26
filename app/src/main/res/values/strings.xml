@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Nokket</string>
+
+    <!-- MainActivity -->
+    <string name="one_dollar">$1</string>
+    <string name="two_dollars">$2</string>
+    <string name="five_dollars">$5</string>
+    <string name="ten_dollars">$10</string>
+    <string name="twenty_dollars">$20</string>
+    <string name="more">More...</string>
+
+    <!-- DonteActivity -->
+    <string name="amount">Amount: $</string>
+
+</resources>
