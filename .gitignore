@@ -1,0 +1,6 @@
+.idea/*
+.gradle/*
+Nokket.iml
+app/app.iml
+build/*
+local.properties
