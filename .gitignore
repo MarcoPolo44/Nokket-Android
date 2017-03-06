@@ -4,3 +4,5 @@ Nokket.iml
 app/app.iml
 build/*
 local.properties
+build.gradle
+gradle/wrapper/gradle-wrapper.properties

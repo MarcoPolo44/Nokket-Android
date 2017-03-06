@@ -6,9 +6,19 @@ import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.braintreepayments.api.BraintreeFragment;
+import com.braintreepayments.api.Card;
+import com.braintreepayments.api.exceptions.InvalidArgumentException;
+import com.braintreepayments.api.interfaces.BraintreeCancelListener;
+import com.braintreepayments.api.interfaces.BraintreeErrorListener;
+import com.braintreepayments.api.interfaces.PaymentMethodNonceCreatedListener;
+import com.braintreepayments.api.models.CardBuilder;
+import com.braintreepayments.api.models.PaymentMethodNonce;
 import com.example.marco.nokket.provider.Provider;
 import com.example.marco.nokket.utils.NFCUtils;
 import com.example.marco.nokket.utils.SimpleAsyncTask;
@@ -18,13 +28,21 @@ import com.github.devnied.emvnfccard.utils.AtrUtils;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 
 import java.io.IOException;
 import java.util.Collection;
 
 import fr.devnied.bitlib.BytesUtils;
+import cz.msebera.android.httpclient.Header;
 
-public class DonateActivity extends AppCompatActivity {
+public class DonateActivity extends AppCompatActivity implements PaymentMethodNonceCreatedListener,
+        BraintreeCancelListener, BraintreeErrorListener {
 
     /**
      * Payment amount
@@ -52,6 +70,12 @@ public class DonateActivity extends AppCompatActivity {
      */
     private byte[] lastAts;
 
+    /**
+     * Braintree
+     */
+    private String mAuthorization;
+    private BraintreeFragment mBraintreeFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,31 +88,74 @@ public class DonateActivity extends AppCompatActivity {
             mAmount.append(mPaymentAmount);
         }
 
-        // init NfcUtils
+        // Initialise NfcUtils
         mNfcUtils = new NFCUtils(this);
 
-        // Read card on launch
-        if (getIntent().getAction() == NfcAdapter.ACTION_TECH_DISCOVERED) {
-            onNewIntent(getIntent());
+        // Get Braintree client token
+        fetchAuthorization();
+    }
+
+    protected void fetchAuthorization() {
+        mAuthorization = null;
+
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.get("http://www.nokket.com/api/client_token", new JsonHttpResponseHandler() {
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                super.onSuccess(statusCode, headers, response);
+
+                Toast.makeText(DonateActivity.this, "Client Token: Success", Toast.LENGTH_LONG).show();
+
+                try {
+                    mAuthorization = response.getString("client_token");
+                    onAuthorizationFetched();
+                }
+                catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                super.onFailure(statusCode, headers, throwable, errorResponse);
+
+                Toast.makeText(DonateActivity.this, "Client Token: Failure", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    public void onAuthorizationFetched() {
+        try {
+            mBraintreeFragment = BraintreeFragment.newInstance(this, mAuthorization);
+            enableNfcPayment(true);
+        } catch (InvalidArgumentException e) {
+            Toast.makeText(DonateActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
     @Override
     protected void onResume() {
+        // Check Braintree authorisation
+        if (mAuthorization != null)
+        {
+            enableNfcPayment(true);
+        }
+        super.onResume();
+    }
+
+    private void enableNfcPayment(boolean enable) {
         mNfcUtils.enableDispatch();
 
-        // Check if NFC is available
         if (!NFCUtils.isNfcAvailable(getApplicationContext())) {
             // NFC not available
             Toast.makeText(this, "NFC not available", Toast.LENGTH_LONG).show();
         }
 
-        // Check if NFC is enabled
         if (!NFCUtils.isNfcEnabled(getApplicationContext())) {
             // NFC not enabled
             Toast.makeText(this, "NFC not enabled", Toast.LENGTH_LONG).show();
         }
-        super.onResume();
     }
 
     @Override
@@ -166,10 +233,8 @@ public class DonateActivity extends AppCompatActivity {
                     if (!mException) {
                         if (mCard != null) {
                             if (StringUtils.isNotBlank(mCard.getCardNumber())) {
-                                Toast.makeText(DonateActivity.this,
-                                        "Card Number: " + mCard.getCardNumber() + "\nExpiry: " + mCard.getExpireDate(),
-                                        Toast.LENGTH_LONG).show();
                                 mReadCard = mCard;
+                                makePayment();
                             } else if (mCard.isNfcLocked()) {
                                 Toast.makeText(DonateActivity.this, "NFC locked", Toast.LENGTH_LONG).show();
                             }
@@ -184,6 +249,90 @@ public class DonateActivity extends AppCompatActivity {
             }.execute();
         }
 
+    }
+
+    private void makePayment()
+    {
+        String cardNumber;
+        String cardMonth;
+        String cardYear;
+
+        cardNumber = String.valueOf(mReadCard.getCardNumber());
+        cardMonth = (String) DateFormat.format("MM",   mReadCard.getExpireDate());
+        cardYear = (String) DateFormat.format("yyyy", mReadCard.getExpireDate());
+
+        Toast.makeText(DonateActivity.this,
+                "Card Number: " + cardNumber + "\nExpiry: " + cardMonth + "/" + cardYear,
+                Toast.LENGTH_LONG).show();
+
+        // Hack for Braintree sandbox
+        cardNumber = "4111111111111111";
+
+        // Create the Braintree payment nonce
+        CardBuilder cardBuilder = new CardBuilder()
+                .cardNumber(cardNumber)
+                .expirationMonth(cardMonth)
+                .expirationYear(cardYear);
+
+        Card.tokenize(mBraintreeFragment, cardBuilder);
+    }
+
+    @Override
+    public void onPaymentMethodNonceCreated(PaymentMethodNonce paymentMethodNonce) {
+        Toast.makeText(DonateActivity.this, "Payment Method Nonce Created", Toast.LENGTH_LONG).show();
+        String nonce = paymentMethodNonce.getNonce();
+
+        AsyncHttpClient client = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        params.put("nonce", nonce);
+        client.post("http://www.nokket.com/api/nonce/transaction", params, new JsonHttpResponseHandler() {
+
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                        super.onSuccess(statusCode, headers, response);
+
+                        try {
+                            String message = response.getString("message");
+
+                            if (message != null && message.startsWith("created")) {
+
+                                Toast.makeText(DonateActivity.this,
+                                        "Payment Success: " + message, Toast.LENGTH_LONG).show();
+                            } else {
+                                if (TextUtils.isEmpty(message)) {
+
+                                    Toast.makeText(DonateActivity.this,
+                                            "Payment Failure: Server response was empty or malformed", Toast.LENGTH_LONG).show();
+                                } else {
+
+                                    Toast.makeText(DonateActivity.this,
+                                            "Payment Failure: " + message, Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        }
+                        catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                        super.onFailure(statusCode, headers, throwable, errorResponse);
+
+                        Toast.makeText(DonateActivity.this, "Payment Failure", Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
+    }
+
+    @Override
+    public void onCancel(int requestCode) {
+        Toast.makeText(DonateActivity.this, "Payment Cancelled", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onError(Exception error) {
+        Toast.makeText(DonateActivity.this, "Payment Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
     }
 
     /**

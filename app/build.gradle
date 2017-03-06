@@ -27,5 +27,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.2.0'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile 'com.github.devnied.emvnfccard:library:2.1.1'
+    compile 'com.loopj.android:android-async-http:1.4.9'
+    compile 'com.braintreepayments.api:drop-in:3.+'
     testCompile 'junit:junit:4.12'
 }
