@@ -285,44 +285,44 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
         params.put("nonce", nonce);
+        params.put("amount", mPaymentAmount);
         client.post("http://www.nokket.com/api/nonce/transaction", params, new JsonHttpResponseHandler() {
 
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                        super.onSuccess(statusCode, headers, response);
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                super.onSuccess(statusCode, headers, response);
 
-                        try {
-                            String message = response.getString("message");
+                try {
+                    String message = response.getString("message");
 
-                            if (message != null && message.startsWith("created")) {
+                    if (message != null && message.startsWith("created")) {
 
-                                Toast.makeText(DonateActivity.this,
-                                        "Payment Success: " + message, Toast.LENGTH_LONG).show();
-                            } else {
-                                if (TextUtils.isEmpty(message)) {
+                        Toast.makeText(DonateActivity.this,
+                                "Payment Success: " + message, Toast.LENGTH_LONG).show();
+                    } else {
+                        if (TextUtils.isEmpty(message)) {
 
-                                    Toast.makeText(DonateActivity.this,
-                                            "Payment Failure: Server response was empty or malformed", Toast.LENGTH_LONG).show();
-                                } else {
+                            Toast.makeText(DonateActivity.this,
+                                    "Payment Failure: Server response was empty or malformed", Toast.LENGTH_LONG).show();
+                        } else {
 
-                                    Toast.makeText(DonateActivity.this,
-                                            "Payment Failure: " + message, Toast.LENGTH_LONG).show();
-                                }
-                            }
+                            Toast.makeText(DonateActivity.this,
+                                    "Payment Failure: " + message, Toast.LENGTH_LONG).show();
                         }
-                        catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                        super.onFailure(statusCode, headers, throwable, errorResponse);
-
-                        Toast.makeText(DonateActivity.this, "Payment Failure", Toast.LENGTH_LONG).show();
                     }
                 }
-        );
+                catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                super.onFailure(statusCode, headers, throwable, errorResponse);
+
+                Toast.makeText(DonateActivity.this, "Payment Failure", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override
