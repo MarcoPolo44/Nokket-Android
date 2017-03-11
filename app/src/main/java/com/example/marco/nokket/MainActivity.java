@@ -18,8 +18,8 @@ public class MainActivity extends AppCompatActivity {
     private Button mTwoDollarsButton;
     private Button mFiveDollarsButton;
     private Button mTenDollarsButton;
-    private Button mTwentyllarsButton;
-    private Button mMoreButton;
+    private Button mTwentyDollarsButton;
+    private Button mFiftyDollarsButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,8 +30,8 @@ public class MainActivity extends AppCompatActivity {
         mTwoDollarsButton = (Button) findViewById(R.id.two_dollars);
         mFiveDollarsButton = (Button) findViewById(R.id.five_dollars);
         mTenDollarsButton = (Button) findViewById(R.id.ten_dollars);
-        mTwentyllarsButton = (Button) findViewById(R.id.twenty_dollars);
-        mMoreButton = (Button) findViewById(R.id.more);
+        mTwentyDollarsButton = (Button) findViewById(R.id.twenty_dollars);
+        mFiftyDollarsButton = (Button) findViewById(R.id.fifty_dollars);
     }
 
     public void launchDonate(View v) {
@@ -51,6 +51,9 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.twenty_dollars:
                 mPaymentAmount = "20";
+                break;
+            case R.id.fifty_dollars:
+                mPaymentAmount = "50";
                 break;
         }
 

@@ -7,9 +7,10 @@
     <string name="five_dollars">$5</string>
     <string name="ten_dollars">$10</string>
     <string name="twenty_dollars">$20</string>
-    <string name="more">More...</string>
+    <string name="fifty_dollars">$50</string>
 
     <!-- DonteActivity -->
     <string name="amount">Amount: $</string>
+    <string name="nfc_prompt">Hold your contactless payment card to the back of the phone</string>
 
 </resources>

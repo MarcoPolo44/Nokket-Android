@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_donate"
     android:layout_width="match_parent"
@@ -8,21 +8,55 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
     tools:context="com.example.marco.nokket.DonateActivity">
 
     <LinearLayout
-        android:orientation="vertical"
+        android:id="@+id/information_dialog"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="16dp">
+        android:layout_height="match_parent"
+        android:layout_weight="9" >
 
         <TextView
             android:id="@+id/amount"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/amount"
-            />
+            android:layout_height="match_parent"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:textSize="22dp"
+            android:text="@string/amount" />
 
     </LinearLayout>
 
-</RelativeLayout>
+    <LinearLayout
+        android:id="@+id/prompt_image_dialog"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:padding="40dp"
+        android:background="@drawable/shadow"
+        android:layout_weight="1.0" >
+
+        <ImageView
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_weight="0.7"
+            android:paddingTop="30dp"
+            android:src="@drawable/contactless_card"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1.0"
+            android:layout_marginTop="20dp"
+            android:textAlignment="center"
+            android:gravity="top"
+            android:textSize="22dp"
+            android:text="@string/nfc_prompt" />
+
+    </LinearLayout>
+
+</LinearLayout>

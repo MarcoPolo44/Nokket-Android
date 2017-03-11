@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
@@ -8,57 +8,136 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
     tools:context="com.example.marco.nokket.MainActivity">
 
     <LinearLayout
-        android:id="@+id/action_buttons"
-        android:orientation="vertical"
+        android:id="@+id/selection_dialog"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true">
+        android:layout_height="match_parent"
+        android:layout_weight="9" >
 
-        <Button
-            android:id="@+id/one_dollar"
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/one_dollar"
-            android:onClick="launchDonate" />
-
-        <Button
-            android:id="@+id/two_dollars"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/two_dollars"
-            android:onClick="launchDonate" />
-
-        <Button
-            android:id="@+id/five_dollars"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/five_dollars"
-            android:onClick="launchDonate" />
-
-        <Button
-            android:id="@+id/ten_dollars"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/ten_dollars"
-            android:onClick="launchDonate" />
-
-        <Button
-            android:id="@+id/twenty_dollars"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/twenty_dollars"
-            android:onClick="launchDonate" />
-
-        <Button
-            android:id="@+id/more"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/more"
-            android:onClick="launchMore" />
+            android:layout_height="match_parent"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:textSize="22dp"
+            android:text="Select an amount to donate" />
 
     </LinearLayout>
 
-</RelativeLayout>
+    <LinearLayout
+        android:id="@+id/background"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:padding="20dp"
+        android:background="@drawable/shadow"
+        android:layout_weight="1.0" >
+
+        <LinearLayout
+            android:id="@+id/top_buttons"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1.0" >
+
+            <Button
+                android:id="@+id/one_dollar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1.0"
+                android:layout_margin="12dp"
+                android:textSize="36dp"
+                android:textColor="#545454"
+                android:background="#AAFFCA00"
+                android:text="@string/one_dollar"
+                android:onClick="launchDonate" />
+
+            <Button
+                android:id="@+id/two_dollars"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1.0"
+                android:layout_margin="12dp"
+                android:textSize="36dp"
+                android:textColor="#545454"
+                android:background="#AAFFCA00"
+                android:text="@string/two_dollars"
+                android:onClick="launchDonate" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/middle_buttons"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1.0" >
+
+            <Button
+                android:id="@+id/five_dollars"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1.0"
+                android:layout_margin="12dp"
+                android:textSize="36dp"
+                android:textColor="#545454"
+                android:background="#AAC86405"
+                android:text="@string/five_dollars"
+                android:onClick="launchDonate" />
+
+            <Button
+                android:id="@+id/ten_dollars"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1.0"
+                android:layout_margin="12dp"
+                android:textSize="36dp"
+                android:textColor="#545454"
+                android:background="#AA017E9E"
+                android:text="@string/ten_dollars"
+                android:onClick="launchDonate" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/bottom_buttons"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1.0" >
+
+            <Button
+                android:id="@+id/twenty_dollars"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1.0"
+                android:layout_margin="12dp"
+                android:textSize="36dp"
+                android:textColor="#545454"
+                android:background="#AA5E8147"
+                android:text="@string/twenty_dollars"
+                android:onClick="launchDonate" />
+
+            <Button
+                android:id="@+id/fifty_dollars"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1.0"
+                android:layout_margin="12dp"
+                android:textSize="36dp"
+                android:textColor="#545454"
+                android:background="#AA875D8D"
+                android:text="@string/fifty_dollars"
+                android:onClick="launchDonate" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
