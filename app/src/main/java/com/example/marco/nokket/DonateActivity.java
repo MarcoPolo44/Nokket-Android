@@ -1,6 +1,8 @@
 package com.example.marco.nokket;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
@@ -8,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,7 +51,18 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
      * Payment amount
      */
     private String mPaymentAmount;
-    private TextView mAmount;
+    private TextView mDonationAmount;
+
+    /**
+     * Donation Parts
+     */
+    private ImageView mDonationImage;
+    private TextView mDonationText;
+
+    /**
+     * Loading
+     */
+    private ProgressDialog mLoading;
 
     /**
      * Nfc utils
@@ -83,10 +97,20 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
 
         mPaymentAmount = getIntent().getStringExtra(MainActivity.EXTRA_PAYMENT_AMOUNT);
 
-        mAmount = (TextView) findViewById(R.id.amount);
+        mDonationAmount = (TextView) findViewById(R.id.donation_amount);
+        mDonationImage = (ImageView) findViewById(R.id.donation_image);
+        mDonationText = (TextView) findViewById(R.id.donation_text);
+
         if (mPaymentAmount != null) {
-            mAmount.append(mPaymentAmount);
+            mDonationAmount.append(mPaymentAmount);
         }
+
+        // Initialise and show loading spinner
+        mLoading = new ProgressDialog(this);
+        mLoading.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        mLoading.setCancelable(false);
+        mLoading.show();
+        mLoading.setContentView(R.layout.loading_spinner);
 
         // Initialise NfcUtils
         mNfcUtils = new NFCUtils(this);
@@ -105,8 +129,6 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 super.onSuccess(statusCode, headers, response);
 
-                Toast.makeText(DonateActivity.this, "Client Token: Success", Toast.LENGTH_LONG).show();
-
                 try {
                     mAuthorization = response.getString("client_token");
                     onAuthorizationFetched();
@@ -121,17 +143,31 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
                 super.onFailure(statusCode, headers, throwable, errorResponse);
 
                 Toast.makeText(DonateActivity.this, "Client Token: Failure", Toast.LENGTH_LONG).show();
+                authorizationFailed();
             }
         });
     }
 
     public void onAuthorizationFetched() {
+
         try {
             mBraintreeFragment = BraintreeFragment.newInstance(this, mAuthorization);
-            enableNfcPayment(true);
+            authorizationSuccess();
         } catch (InvalidArgumentException e) {
             Toast.makeText(DonateActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+            authorizationFailed();
         }
+    }
+
+    public void authorizationSuccess() {
+        mLoading.dismiss();
+        enableNfcPayment(true);
+    }
+
+    public void authorizationFailed() {
+        mLoading.dismiss();
+        mDonationImage.setImageResource(R.drawable.negative_smiley);
+        mDonationText.setText(R.string.error);
     }
 
     @Override
@@ -150,12 +186,27 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
         if (!NFCUtils.isNfcAvailable(getApplicationContext())) {
             // NFC not available
             Toast.makeText(this, "NFC not available", Toast.LENGTH_LONG).show();
+            enableNfcFailed();
         }
-
-        if (!NFCUtils.isNfcEnabled(getApplicationContext())) {
+        else if (!NFCUtils.isNfcEnabled(getApplicationContext())) {
             // NFC not enabled
             Toast.makeText(this, "NFC not enabled", Toast.LENGTH_LONG).show();
+            enableNfcFailed();
         }
+        else
+        {
+            enableNfcSuccess();
+        }
+    }
+
+    private void enableNfcSuccess() {
+        mDonationImage.setImageResource(R.drawable.contactless_card);
+        mDonationText.setText(R.string.nfc_prompt);
+    }
+
+    private void enableNfcFailed() {
+        mDonationImage.setImageResource(R.drawable.negative_smiley);
+        mDonationText.setText(R.string.error);
     }
 
     @Override

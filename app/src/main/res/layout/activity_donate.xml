@@ -12,14 +12,13 @@
     tools:context="com.example.marco.nokket.DonateActivity">
 
     <LinearLayout
-        android:id="@+id/information_dialog"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="9" >
 
         <TextView
-            android:id="@+id/amount"
+            android:id="@+id/donation_amount"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:textAlignment="center"
@@ -30,7 +29,6 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/prompt_image_dialog"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -41,21 +39,21 @@
         android:layout_weight="1.0" >
 
         <ImageView
+            android:id="@+id/donation_image"
             android:layout_height="match_parent"
             android:layout_width="match_parent"
             android:layout_weight="0.7"
-            android:paddingTop="30dp"
-            android:src="@drawable/contactless_card"/>
+            android:paddingTop="30dp" />
 
         <TextView
+            android:id="@+id/donation_text"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1.0"
             android:layout_marginTop="20dp"
             android:textAlignment="center"
             android:gravity="top"
-            android:textSize="22dp"
-            android:text="@string/nfc_prompt" />
+            android:textSize="22dp" />
 
     </LinearLayout>
 

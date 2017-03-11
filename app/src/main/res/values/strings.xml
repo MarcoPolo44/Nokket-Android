@@ -12,5 +12,6 @@
     <!-- DonteActivity -->
     <string name="amount">Amount: $</string>
     <string name="nfc_prompt">Hold your contactless payment card to the back of the phone</string>
+    <string name="error">Something went wrong - Please try again later.</string>
 
 </resources>
