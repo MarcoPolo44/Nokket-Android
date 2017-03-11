@@ -48,10 +48,16 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
         BraintreeCancelListener, BraintreeErrorListener {
 
     /**
+     * Result intent
+     */
+    static final String EXTRA_PAYMENT_RESULT = "payment_result";
+    private static final int RESULT_REQUEST = 100;
+
+    /**
      * Payment amount
      */
     private String mPaymentAmount;
-    private TextView mDonationAmount;
+    private TextView mDonationStatus;
 
     /**
      * Donation Parts
@@ -97,12 +103,16 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
 
         mPaymentAmount = getIntent().getStringExtra(MainActivity.EXTRA_PAYMENT_AMOUNT);
 
-        mDonationAmount = (TextView) findViewById(R.id.donation_amount);
+        mDonationStatus = (TextView) findViewById(R.id.donation_status);
         mDonationImage = (ImageView) findViewById(R.id.donation_image);
         mDonationText = (TextView) findViewById(R.id.donation_text);
 
         if (mPaymentAmount != null) {
-            mDonationAmount.append(mPaymentAmount);
+            String preAmount = getResources().getString(R.string.amount);
+            mDonationStatus.setText(preAmount + mPaymentAmount);
+        }
+        else {
+            mDonationStatus.setText(R.string.error);
         }
 
         // Initialise and show loading spinner
@@ -167,7 +177,7 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
     public void authorizationFailed() {
         mLoading.dismiss();
         mDonationImage.setImageResource(R.drawable.negative_smiley);
-        mDonationText.setText(R.string.error);
+        mDonationText.setText(R.string.error_text);
     }
 
     @Override
@@ -206,7 +216,7 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
 
     private void enableNfcFailed() {
         mDonationImage.setImageResource(R.drawable.negative_smiley);
-        mDonationText.setText(R.string.error);
+        mDonationText.setText(R.string.error_text);
     }
 
     @Override
@@ -243,7 +253,12 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
                     super.onPreExecute();
 
                     mProvider.getLog().setLength(0);
-                    Toast.makeText(DonateActivity.this, "Reading card", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(DonateActivity.this, "Reading card", Toast.LENGTH_LONG).show();
+
+                    mDonationStatus.setText(R.string.processing);
+
+                    mLoading.show();
+                    mLoading.setContentView(R.layout.loading_spinner);
                 }
 
                 @Override
@@ -252,6 +267,7 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
                     mTagcomm = IsoDep.get(mTag);
                     if (mTagcomm == null) {
                         Toast.makeText(DonateActivity.this, "Read error", Toast.LENGTH_LONG).show();
+                        donationResult(false);
                         return;
                     }
                     mException = false;
@@ -288,12 +304,15 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
                                 makePayment();
                             } else if (mCard.isNfcLocked()) {
                                 Toast.makeText(DonateActivity.this, "NFC locked", Toast.LENGTH_LONG).show();
+                                donationResult(false);
                             }
                         } else {
                             Toast.makeText(DonateActivity.this, "Unknown card error", Toast.LENGTH_LONG).show();
+                            donationResult(false);
                         }
                     } else {
                         Toast.makeText(DonateActivity.this, "NFC communication error", Toast.LENGTH_LONG).show();
+                        donationResult(false);
                     }
                 }
 
@@ -347,18 +366,18 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
                     String message = response.getString("message");
 
                     if (message != null && message.startsWith("created")) {
-
                         Toast.makeText(DonateActivity.this,
                                 "Payment Success: " + message, Toast.LENGTH_LONG).show();
+                        donationResult(true);
                     } else {
                         if (TextUtils.isEmpty(message)) {
-
                             Toast.makeText(DonateActivity.this,
                                     "Payment Failure: Server response was empty or malformed", Toast.LENGTH_LONG).show();
+                            donationResult(false);
                         } else {
-
                             Toast.makeText(DonateActivity.this,
                                     "Payment Failure: " + message, Toast.LENGTH_LONG).show();
+                            donationResult(false);
                         }
                     }
                 }
@@ -370,8 +389,8 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
             @Override
             public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
                 super.onFailure(statusCode, headers, throwable, errorResponse);
-
                 Toast.makeText(DonateActivity.this, "Payment Failure", Toast.LENGTH_LONG).show();
+                donationResult(false);
             }
         });
     }
@@ -379,11 +398,21 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
     @Override
     public void onCancel(int requestCode) {
         Toast.makeText(DonateActivity.this, "Payment Cancelled", Toast.LENGTH_LONG).show();
+        donationResult(false);
     }
 
     @Override
     public void onError(Exception error) {
-        Toast.makeText(DonateActivity.this, "Payment Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
+        Toast.makeText(DonateActivity.this,
+                "Payment Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
+        donationResult(false);
+    }
+
+    private void donationResult(boolean success) {
+        Intent intent = new Intent(DonateActivity.this, ResultActivity.class)
+                .putExtra(EXTRA_PAYMENT_RESULT, success);
+        startActivityForResult(intent, RESULT_REQUEST);
+        finish();
     }
 
     /**

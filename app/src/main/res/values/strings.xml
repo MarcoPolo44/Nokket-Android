@@ -9,9 +9,15 @@
     <string name="twenty_dollars">$20</string>
     <string name="fifty_dollars">$50</string>
 
-    <!-- DonteActivity -->
+    <!-- DonateActivity -->
     <string name="amount">Amount: $</string>
     <string name="nfc_prompt">Hold your contactless payment card to the back of the phone</string>
-    <string name="error">Something went wrong - Please try again later.</string>
+    <string name="processing">Processing...</string>
+
+    <!-- ResultActivity -->
+    <string name="success">Success</string>
+    <string name="success_text">Thank you for donating with Nokket</string>
+    <string name="error">Error</string>
+    <string name="error_text">Something went wrong - Please try again later</string>
 
 </resources>

@@ -60,5 +60,6 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, DonateActivity.class)
                 .putExtra(EXTRA_PAYMENT_AMOUNT, mPaymentAmount);
         startActivityForResult(intent, DONATE_REQUEST);
+        finish();
     }
 }
