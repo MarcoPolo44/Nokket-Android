@@ -6,14 +6,25 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+/**
+ * Created by Marco on 3/11/2017.
+ */
+
 public class MainActivity extends AppCompatActivity {
 
+    /**
+     * Intent extras
+     */
     static final String EXTRA_PAYMENT_AMOUNT = "payment_amount";
 
-    private static final int DONATE_REQUEST = 100;
-
+    /**
+     * Payment amount
+     */
     private String mPaymentAmount;
 
+    /**
+     * Amount buttons
+     */
     private Button mOneDollarButton;
     private Button mTwoDollarsButton;
     private Button mFiveDollarsButton;
@@ -26,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Get views
         mOneDollarButton = (Button) findViewById(R.id.one_dollar);
         mTwoDollarsButton = (Button) findViewById(R.id.two_dollars);
         mFiveDollarsButton = (Button) findViewById(R.id.five_dollars);
@@ -59,7 +71,6 @@ public class MainActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, DonateActivity.class)
                 .putExtra(EXTRA_PAYMENT_AMOUNT, mPaymentAmount);
-        startActivityForResult(intent, DONATE_REQUEST);
-        finish();
+        startActivity(intent);
     }
 }

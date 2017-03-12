@@ -44,31 +44,52 @@ import java.util.Collection;
 import fr.devnied.bitlib.BytesUtils;
 import cz.msebera.android.httpclient.Header;
 
+/**
+ * Created by Marco on 3/11/2017.
+ */
+
 public class DonateActivity extends AppCompatActivity implements PaymentMethodNonceCreatedListener,
         BraintreeCancelListener, BraintreeErrorListener {
 
     /**
-     * Result intent
+     * Intent extras
      */
     static final String EXTRA_PAYMENT_RESULT = "payment_result";
-    private static final int RESULT_REQUEST = 100;
 
     /**
      * Payment amount
      */
     private String mPaymentAmount;
+
+    /**
+     * Donation status
+     */
     private TextView mDonationStatus;
 
     /**
-     * Donation Parts
+     * Donation image
      */
     private ImageView mDonationImage;
+
+    /**
+     * Donation text
+     */
     private TextView mDonationText;
 
     /**
-     * Loading
+     * Loading spinner
      */
     private ProgressDialog mLoading;
+
+    /**
+     * Braintree authorization
+     */
+    private String mAuthorization;
+
+    /**
+     * Braintree fragment
+     */
+    private BraintreeFragment mBraintreeFragment;
 
     /**
      * Nfc utils
@@ -90,43 +111,46 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
      */
     private byte[] lastAts;
 
-    /**
-     * Braintree
-     */
-    private String mAuthorization;
-    private BraintreeFragment mBraintreeFragment;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_donate);
 
+        // Get intents
         mPaymentAmount = getIntent().getStringExtra(MainActivity.EXTRA_PAYMENT_AMOUNT);
 
+        // Get views
         mDonationStatus = (TextView) findViewById(R.id.donation_status);
         mDonationImage = (ImageView) findViewById(R.id.donation_image);
         mDonationText = (TextView) findViewById(R.id.donation_text);
 
-        if (mPaymentAmount != null) {
-            String preAmount = getResources().getString(R.string.amount);
-            mDonationStatus.setText(preAmount + mPaymentAmount);
-        }
-        else {
-            mDonationStatus.setText(R.string.error);
-        }
-
-        // Initialise and show loading spinner
+        // Initialise loading spinner
         mLoading = new ProgressDialog(this);
         mLoading.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
         mLoading.setCancelable(false);
-        mLoading.show();
-        mLoading.setContentView(R.layout.loading_spinner);
 
         // Initialise NfcUtils
         mNfcUtils = new NFCUtils(this);
 
-        // Get Braintree client token
-        fetchAuthorization();
+        // Check for missing payment amount
+        if (mPaymentAmount == null) {
+            // Error - No donation amount
+            mDonationStatus.setText(R.string.error);
+            mDonationImage.setImageResource(R.drawable.negative_smiley);
+            mDonationText.setText(R.string.error_text);
+        }
+        else {
+            // Set status to the donation amount
+            String preAmount = getResources().getString(R.string.amount);
+            mDonationStatus.setText(preAmount + mPaymentAmount);
+
+            // Display loading spinner
+            mLoading.show();
+            mLoading.setContentView(R.layout.loading_spinner);
+
+            // Get Braintree client token
+            fetchAuthorization();
+        }
     }
 
     protected void fetchAuthorization() {
@@ -159,7 +183,6 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
     }
 
     public void onAuthorizationFetched() {
-
         try {
             mBraintreeFragment = BraintreeFragment.newInstance(this, mAuthorization);
             authorizationSuccess();
@@ -171,7 +194,7 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
 
     public void authorizationSuccess() {
         mLoading.dismiss();
-        enableNfcPayment(true);
+        enableNfcPayment();
     }
 
     public void authorizationFailed() {
@@ -182,15 +205,15 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
 
     @Override
     protected void onResume() {
-        // Check Braintree authorisation
+        // Check Braintree authorization
         if (mAuthorization != null)
         {
-            enableNfcPayment(true);
+            enableNfcPayment();
         }
         super.onResume();
     }
 
-    private void enableNfcPayment(boolean enable) {
+    private void enableNfcPayment() {
         mNfcUtils.enableDispatch();
 
         if (!NFCUtils.isNfcAvailable(getApplicationContext())) {
@@ -223,6 +246,7 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
     protected void onPause() {
         super.onPause();
         mNfcUtils.disableDispatch();
+        mLoading.dismiss();
     }
 
     @Override
@@ -411,7 +435,7 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
     private void donationResult(boolean success) {
         Intent intent = new Intent(DonateActivity.this, ResultActivity.class)
                 .putExtra(EXTRA_PAYMENT_RESULT, success);
-        startActivityForResult(intent, RESULT_REQUEST);
+        startActivity(intent);
         finish();
     }
 
