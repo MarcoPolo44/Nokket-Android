@@ -140,9 +140,8 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
             mDonationText.setText(R.string.error_text);
         }
         else {
-            // Set status to the donation amount
-            String preAmount = getResources().getString(R.string.amount);
-            mDonationStatus.setText(preAmount + mPaymentAmount);
+            // Set status to loading
+            mDonationStatus.setText(R.string.connecting);
 
             // Display loading spinner
             mLoading.show();
@@ -199,6 +198,7 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
 
     public void authorizationFailed() {
         mLoading.dismiss();
+        mDonationStatus.setText(R.string.error);
         mDonationImage.setImageResource(R.drawable.negative_smiley);
         mDonationText.setText(R.string.error_text);
     }
@@ -233,11 +233,15 @@ public class DonateActivity extends AppCompatActivity implements PaymentMethodNo
     }
 
     private void enableNfcSuccess() {
+        String preAmount = getResources().getString(R.string.amount);
+
+        mDonationStatus.setText(preAmount + mPaymentAmount);
         mDonationImage.setImageResource(R.drawable.contactless_card);
         mDonationText.setText(R.string.nfc_prompt);
     }
 
     private void enableNfcFailed() {
+        mDonationStatus.setText(R.string.error);
         mDonationImage.setImageResource(R.drawable.negative_smiley);
         mDonationText.setText(R.string.error_text);
     }

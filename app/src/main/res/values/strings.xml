@@ -10,6 +10,7 @@
     <string name="fifty_dollars">$50</string>
 
     <!-- DonateActivity -->
+    <string name="connecting">Connecting...</string>
     <string name="amount">Amount: $</string>
     <string name="nfc_prompt">Hold your contactless payment card to the back of the phone</string>
     <string name="processing">Processing...</string>
